@@ -26,6 +26,16 @@ packages: dict[str, Package] = {
                 "dependencies": []
             },
         }
+    },
+    "dep-urllib3": {
+        "versions": {
+            "1.26.20": {
+                "dependencies": []
+            },
+            "2.3.0": {
+                "dependencies": []
+            },
+        }
     }
 }
 
