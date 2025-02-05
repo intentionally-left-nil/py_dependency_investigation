@@ -21,8 +21,8 @@ build_all_wheels: clean_wheels
 scenario1: clean_scenarios
 	mkdir -p scenario1
 	python -m venv scenario1/.venv
-	.venv/bin/python build_wheels.py dep-a
-	scenario1/.venv/bin/pip install 'dep-a==0.1.0' --index-url http://localhost:8000 --no-cache-dir
-	scenario1/.venv/bin/python -c "import dep_a; dep_a.hello()"
-	scenario1/.venv/bin/pip install 'dep-a>0.2.0' --index-url http://localhost:8000 --no-cache-dir
-	scenario1/.venv/bin/python -c "import dep_a; dep_a.hello()"
+	.venv/bin/python build_wheels.py dep-plain
+	scenario1/.venv/bin/pip install 'dep-plain==0.1.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario1/.venv/bin/python -c "import dep_plain; dep_plain.hello()"
+	scenario1/.venv/bin/pip install 'dep-plain>0.2.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario1/.venv/bin/python -c "import dep_plain; dep_plain.hello()"

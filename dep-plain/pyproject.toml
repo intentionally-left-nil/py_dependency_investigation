@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "dep-a"
+name = "dep-plain"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
@@ -27,12 +27,12 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Documentation = "https://github.com/unknown/dep-a#readme"
-Issues = "https://github.com/unknown/dep-a/issues"
-Source = "https://github.com/unknown/dep-a"
+Documentation = "https://github.com/unknown/dep-plain#readme"
+Issues = "https://github.com/unknown/dep-plain/issues"
+Source = "https://github.com/unknown/dep-plain"
 
 [tool.hatch.version]
-path = "dep_a/__about__.py"
+path = "dep_plain/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -59,19 +59,19 @@ dependencies = [
   "mypy>=1.0.0",
 ]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:dep_a tests}"
+check = "mypy --install-types --non-interactive {args:dep_plain tests}"
 
 [tool.coverage.run]
-source_pkgs = ["dep_a", "tests"]
+source_pkgs = ["dep_plain", "tests"]
 branch = true
 parallel = true
 omit = [
-  "dep_a/__about__.py",
+  "dep_plain/__about__.py",
 ]
 
 [tool.coverage.paths]
-dep_a = ["dep_a", "*/dep-a/dep_a"]
-tests = ["tests", "*/dep-a/tests"]
+dep_plain = ["dep_plain", "*/dep-plain/dep_plain"]
+tests = ["tests", "*/dep-plain/tests"]
 
 [tool.coverage.report]
 exclude_lines = [

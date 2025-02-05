@@ -14,7 +14,7 @@ class Package(TypedDict):
 
 
 packages: dict[str, Package] = {
-    "dep-a": {
+    "dep-plain": {
         "versions": {
             "0.1.0": {
                 "dependencies": []

@@ -5,4 +5,4 @@
 from .__about__ import __version__
 
 def hello() -> None:
-    print(f"dep-a: {__version__}")
+    print(f"dep-plain: {__version__}")
