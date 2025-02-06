@@ -51,3 +51,18 @@ scenario3: clean_scenarios
 	python -m venv scenario3/.venv
 	scenario3/.venv/bin/pip install 'dep-bad-upper-bound' 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario3/.venv/bin/python -c "import dep_bad_upper_bound; dep_bad_upper_bound.hello()"
+
+
+scenario4: clean_scenarios
+	@echo "This scenario shows that pip uses the .dist-info/METADATA field to determine what a package's dependencies are"
+	@echo "First we'll install dep-old, which requires urllib3 v1. Then we'll modify the METADATA to allow urllib3 v2"
+	@echo "Finally, we'll install urllib3 v2 and see that pip will allow installation"
+	mkdir -p scenario4
+	python -m venv scenario4/.venv
+	scenario4/.venv/bin/pip install 'dep-old==0.1.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario4/.venv/bin/python -c "import dep_old; dep_old.hello()"
+	@echo "Now we'll modify the METADATA to allow urllib3 v2"
+	sed -i '' 's/dep-urllib3==1.26.20/dep-urllib3>=1.0.0/' scenario4/.venv/lib/python3.*/site-packages/dep_old-0.1.0.dist-info/METADATA
+	scenario4/.venv/bin/pip install 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario4/.venv/bin/python -c "import dep_old; dep_old.hello()"
+	
