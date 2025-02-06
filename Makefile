@@ -45,3 +45,9 @@ scenario2: clean_scenarios
 	scenario2/.venv/bin/pip install 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario2/.venv/bin/pip install 'dep-old==0.1.0' --index-url http://localhost:8000 --no-cache-dir
 
+scenario3: clean_scenarios
+	@echo "This scenario covers what happens if an old version of a package doens't have the correct dependency specifiers"
+	mkdir -p scenario3
+	python -m venv scenario3/.venv
+	scenario3/.venv/bin/pip install 'dep-bad-upper-bound' 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario3/.venv/bin/python -c "import dep_bad_upper_bound; dep_bad_upper_bound.hello()"

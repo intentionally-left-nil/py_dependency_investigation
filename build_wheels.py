@@ -43,6 +43,16 @@ packages: dict[str, Package] = {
                 "dependencies": ["dep-urllib3==1.26.20"]
             }
         }
+    },
+    "dep-bad-upper-bound": {
+        "versions": {
+            "0.1.0": {
+                "dependencies": ["dep-urllib3>=1.0.0"]
+            },
+            "0.2.0": {
+                "dependencies": ["dep-urllib3~=1.0"]
+            }
+        }
     }
 }
 

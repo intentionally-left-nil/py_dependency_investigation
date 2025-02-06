@@ -10,13 +10,13 @@ def hello() -> None:
 def hello_v1() -> None:
     parts = __version__.split('.')
     if parts[0] > '1':
-        raise NotImplementedError(f"hello_v1 is not implemented for {__version__}")
+        raise NotImplementedError(f"hello_v1 is not implemented for dep-urllib3=={__version__}")
     hello()
 
 def hello_v2() -> None:
     parts = __version__.split('.')
     if parts[0] < '1':
-        raise NotImplementedError(f"hello_v2 is not implemented for {__version__}")
+        raise NotImplementedError(f"hello_v2 is not implemented for dep-urllib3=={__version__}")
     hello()
     
     
