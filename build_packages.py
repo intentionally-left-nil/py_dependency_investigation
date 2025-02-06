@@ -45,6 +45,11 @@ def build_packages_for_project(project_name: str) -> None:
     conda_path = root / "pupa" / ".env" / "bin" / "conda"
     if not conda_path.exists():
         raise ValueError(f"conda not found in {conda_path}")
+
+    hatch_path = root / ".venv" / "bin" / "hatch"
+    if not hatch_path.exists():
+        raise ValueError(f"hatch not found in {hatch_path}")
+
     pyproject_path = project_root / "pyproject.toml"
     if not pyproject_path.exists():
         raise ValueError(f"pyproject.toml not found for {project_name}")
@@ -72,7 +77,7 @@ def build_packages_for_project(project_name: str) -> None:
 
             print(f"Building {project_name}=={version}")
             _ = subprocess.run(
-                ["hatch", "build", "-t", "wheel"], cwd=project_root, check=True
+                [hatch_path, "build", "-t", "wheel"], cwd=project_root, check=True
             )
 
             print(f"Building conda package for {project_name}=={version}")

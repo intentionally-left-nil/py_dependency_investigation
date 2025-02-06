@@ -1,4 +1,4 @@
-.PHONY: setup serve scenario1 clean clean_wheels clean_scenarios build_all_wheels build install_pupa
+.PHONY: setup serve clean clean_scenarios build install_pupa scenario1 scenario1conda scenario2 scenario2conda scenario3 scenario3conda scenario4 scenario4conda
 
 setup: install_pupa
 	python -m venv .venv
