@@ -1,21 +1,28 @@
-.PHONY: setup serve scenario1 clean clean_wheels clean_scenarios build_all_wheels build
-setup:
+.PHONY: setup serve scenario1 clean clean_wheels clean_scenarios build_all_wheels build install_pupa
+
+setup: install_pupa
 	python -m venv .venv
 	.venv/bin/pip install -r requirements.txt
 
+install_pupa:
+	rm -rf pupa
+	mkdir -p pupa
+	conda create -p pupa/.env python=3.12 conda conda-index -y
+	git clone https://github.com/dholth/conda-pupa.git pupa/conda-pupa
+	pupa/.env/bin/pip install -e pupa/conda-pupa
+
 build: clean
-	.venv/bin/python build_wheels.py
+	.venv/bin/python build_packages.py
 
 serve:
 	.venv/bin/fastapi dev ./pypi_server.py --no-reload
 
 clean: clean_scenarios
+	rm -rf conda-packages
 	find dep-* -type f -name "*.whl" -delete
 
 clean_scenarios:
 	rm -rf scenario*
-
-
 
 scenario1: clean_scenarios
 	@echo "This scenario shows that pip will update a simple package to satisfy the requirements"
@@ -34,6 +41,36 @@ scenario1: clean_scenarios
 	@echo "Installing dep-plain to show that pip re-installs the package"
 	scenario1/.venv/bin/pip install 'dep-plain>0.2.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario1/.venv/bin/python -c "import dep_plain; dep_plain.hello()"
+
+scenario1conda: clean_scenarios
+	@echo "This is the same as scenario1, but using conda to install the package"
+	mkdir -p scenario1conda
+	conda create -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-plain=0.1.0'
+	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+	@echo "Updating dep-plain"
+	conda install -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
+	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+	@echo "No-op if the requirement is already satisfied"
+	conda install -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
+
+	@echo "Deleting the .dist-info directory"
+	rm -rf scenario1conda/.env/lib/python3.*/site-packages/dep_plain-*.dist-info
+	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+	@echo "Installing dep-plain shows that conda already thinks the package is installed and no-ops"
+	conda install -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
+	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+	@echo "Deleting the conda-meta json file"
+	rm scenario1conda/.env/conda-meta/dep-plain-*.json
+
+	@echo "Installing dep-plain to show that conda re-installs the package"
+	conda install -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
+	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+
 
 scenario2: clean_scenarios
 	@echo "This scenario covers what happens if you have a dependency that can't be satisfied"

@@ -171,3 +171,5 @@ cython_debug/
 .pypirc
 
 /scenario*
+conda-pupa/
+conda-packages/
