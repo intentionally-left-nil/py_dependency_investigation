@@ -157,3 +157,126 @@ Contrasts conda's behavior with the same metadata manipulation:
    - Modifying pip's metadata has no effect
    - Conda continues to enforce the original constraints
    - Highlights the more robust nature of conda's package tracking
+
+# How it works: Pip/Pypi
+
+## Creating a PyPI server
+
+We don't actually want to upload these toy packages to a real PyPI server, so we implement a [PEP-691](https://peps.python.org/pep-0691/) HTTP rest server. This server has three endpoints:
+
+1. GET `/` which returns a list of all projects (e.g.)
+
+```json
+{
+  "meta": {
+    "api_version": "1.0"
+  },
+  "projects": [
+    {
+      "name": "dep-bad-upper-bound"
+    },
+    {
+      "name": "dep-bad-upper-bound"
+    },
+    {
+      "name": "dep-urllib3"
+    },
+    {
+      "name": "dep-urllib3"
+    },
+    {
+      "name": "dep-plain"
+    },
+    {
+      "name": "dep-plain"
+    },
+    {
+      "name": "dep-plain"
+    },
+    {
+      "name": "dep-old"
+    }
+  ]
+}
+```
+
+1. GET `/<project>` which returns a list of files, pointing to each wheel:
+
+```json
+{
+  "meta": {
+    "api_version": "1.0"
+  },
+  "name": "dep-plain",
+  "versions": ["1.0.0", "0.2.0", "0.1.0"],
+  "files": [
+    {
+      "filename": "dep_plain-0.1.0-py3-none-any.whl",
+      "url": "/dep-plain/dep_plain-0.1.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "c3503d661aa1cc069ad5b02876c18a081d6d783598e053dfe6cd1684313b84b2"
+      },
+      "provenance": null,
+      "requires_python": null,
+      "core_metadata": false,
+      "size": null,
+      "yanked": null,
+      "upload_time": null
+    },
+    {
+      "filename": "dep_plain-0.2.0-py3-none-any.whl",
+      "url": "/dep-plain/dep_plain-0.2.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "ede3eafd8a662a0274dce36c52bb7e6b23889608b1b87874f46eb123cd3d4352"
+      },
+      "provenance": null,
+      "requires_python": null,
+      "core_metadata": false,
+      "size": null,
+      "yanked": null,
+      "upload_time": null
+    },
+    {
+      "filename": "dep_plain-1.0.0-py3-none-any.whl",
+      "url": "/dep-plain/dep_plain-1.0.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "018ed1c86e90c0abe1cd2e7fd7da76a901e89412d594b06476d3f4eb632aac2d"
+      },
+      "provenance": null,
+      "requires_python": null,
+      "core_metadata": false,
+      "size": null,
+      "yanked": null,
+      "upload_time": null
+    }
+  ]
+}
+```
+
+3. GET `/<project>/<wheel_name>.whl` which returns the corresponding wheel listed in the `/<project>` endpoint.
+
+The implementation of the server is pretty simple (and very unoptimized). For each request, we search for every wheel `wheels = current_dir.glob("dep-*/**/*.whl")` that is present in the directory. Then, the API builds up the correct response from the wheels present
+
+## Getting pip to use the server
+
+To get pip to use the server, we can use the `--index-url` flag to point to the server. For example,
+
+```sh
+pip install --index-url http://localhost:8000 dep-plain
+```
+
+# How it works: Conda
+
+In order to install conda packages, you need a conda channel. A minimal conda channel consists of a `repodata.json` and the corresponding conda packages. Unlike pip, conda allows you to point at a local directory which has the appropriate structure.
+
+## Generating the conda packages
+
+We use [conda-pupa](https://dholth.github.io/conda-pupa/) to generate conda packages. When run, `conda-pupa` will output the corresponding `.conda` file to our specified `./conda-packages/noarch` directory. Then, we need to generate the repodata.json (and other misc. files). This is accomplished by running `conda index` in the `./conda-packages` directory.
+
+## Getting conda to use the server
+
+To get conda to use the server, we can use the `--channel` flag to point to the server. For example,
+
+```sh
+conda install --channel file://$(PWD)/conda-packages dep-plain
+```
