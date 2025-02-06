@@ -1,4 +1,7 @@
-.PHONY: setup serve clean clean_scenarios build install_pupa scenario1 scenario1conda scenario2 scenario2conda scenario3 scenario3conda scenario4 scenario4conda
+.PHONY: setup serve clean clean_scenarios build install_pupa \
+        scenario1 scenario1a scenario2 scenario2a \
+        scenario3 scenario3a scenario4 scenario4a \
+        scenario5
 
 setup: install_pupa
 	python -m venv .venv
@@ -42,33 +45,33 @@ scenario1: clean_scenarios
 	scenario1/.venv/bin/pip install 'dep-plain>0.2.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario1/.venv/bin/python -c "import dep_plain; dep_plain.hello()"
 
-scenario1conda: clean_scenarios
+scenario1a: clean_scenarios
 	@echo "This is the same as scenario1, but using conda to install the package"
-	mkdir -p scenario1conda
-	conda create -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-plain=0.1.0'
-	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+	mkdir -p scenario1a
+	conda create -p scenario1a/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-plain=0.1.0'
+	scenario1a/.env/bin/python -c "import dep_plain; dep_plain.hello()"
 
 	@echo "Updating dep-plain"
-	conda install -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
-	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+	conda install -p scenario1a/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
+	scenario1a/.env/bin/python -c "import dep_plain; dep_plain.hello()"
 
 	@echo "No-op if the requirement is already satisfied"
-	conda install -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
+	conda install -p scenario1a/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
 
 	@echo "Deleting the .dist-info directory"
-	rm -rf scenario1conda/.env/lib/python3.*/site-packages/dep_plain-*.dist-info
-	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+	rm -rf scenario1a/.env/lib/python3.*/site-packages/dep_plain-*.dist-info
+	scenario1a/.env/bin/python -c "import dep_plain; dep_plain.hello()"
 
 	@echo "Installing dep-plain shows that conda already thinks the package is installed and no-ops"
-	conda install -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
-	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+	conda install -p scenario1a/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
+	scenario1a/.env/bin/python -c "import dep_plain; dep_plain.hello()"
 
 	@echo "Deleting the conda-meta json file"
-	rm scenario1conda/.env/conda-meta/dep-plain-*.json
+	rm scenario1a/.env/conda-meta/dep-plain-*.json
 
 	@echo "Installing dep-plain to show that conda re-installs the package"
-	conda install -p scenario1conda/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
-	scenario1conda/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+	conda install -p scenario1a/.env --channel file://$(PWD)/conda-packages -y 'dep-plain>0.2.0'
+	scenario1a/.env/bin/python -c "import dep_plain; dep_plain.hello()"
 
 scenario2: clean_scenarios
 	@echo "This scenario covers what happens if you have a dependency that can't be satisfied"
@@ -80,13 +83,13 @@ scenario2: clean_scenarios
 	scenario2/.venv/bin/pip install 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario2/.venv/bin/pip install 'dep-old==0.1.0' --index-url http://localhost:8000 --no-cache-dir
 
-scenario2conda: clean_scenarios
+scenario2a: clean_scenarios
 	@echo "This is the same as scenario2, but using conda to install the packages"
-	mkdir -p scenario2conda
-	conda create -p scenario2conda/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-old=0.1.0' 'dep-urllib3=2.3.0' || true
-	conda create -p scenario2conda/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-urllib3=2.3.0'
+	mkdir -p scenario2a
+	conda create -p scenario2a/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-old=0.1.0' 'dep-urllib3=2.3.0' || true
+	conda create -p scenario2a/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-urllib3=2.3.0'
 	@echo "Unlike pip, conda won't downgrade urllib3 since it was user-installed"
-	conda install -p scenario2conda/.env --channel file://$(PWD)/conda-packages -y 'dep-old=0.1.0' || true
+	conda install -p scenario2a/.env --channel file://$(PWD)/conda-packages -y 'dep-old=0.1.0' || true
 
 scenario3: clean_scenarios
 	@echo "This scenario covers what happens if an old version of a package doens't have the correct dependency specifiers"
@@ -95,11 +98,11 @@ scenario3: clean_scenarios
 	scenario3/.venv/bin/pip install 'dep-bad-upper-bound' 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario3/.venv/bin/python -c "import dep_bad_upper_bound; dep_bad_upper_bound.hello()"
 
-scenario3conda: clean_scenarios
+scenario3a: clean_scenarios
 	@echo "This is the same as scenario3, but using conda to install the packages"
-	mkdir -p scenario3conda
-	conda create -p scenario3conda/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-bad-upper-bound' 'dep-urllib3=2.3.0'
-	scenario3conda/.env/bin/python -c "import dep_bad_upper_bound; dep_bad_upper_bound.hello()"
+	mkdir -p scenario3a
+	conda create -p scenario3a/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-bad-upper-bound' 'dep-urllib3=2.3.0'
+	scenario3a/.env/bin/python -c "import dep_bad_upper_bound; dep_bad_upper_bound.hello()"
 
 scenario4: clean_scenarios
 	@echo "This scenario shows that pip uses the .dist-info/METADATA field to determine what a package's dependencies are"
@@ -114,13 +117,35 @@ scenario4: clean_scenarios
 	scenario4/.venv/bin/pip install 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario4/.venv/bin/python -c "import dep_old; dep_old.hello()"
 	
-scenario4conda: clean_scenarios
+scenario4a: clean_scenarios
 	@echo "This is the same as scenario4, but using conda to install the packages"
-	mkdir -p scenario4conda
-	conda create -p scenario4conda/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-old=0.1.0'
-	scenario4conda/.env/bin/python -c "import dep_old; dep_old.hello()"
+	mkdir -p scenario4a
+	conda create -p scenario4a/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-old=0.1.0'
+	scenario4a/.env/bin/python -c "import dep_old; dep_old.hello()"
 
 	@echo "Now we'll modify the METADATA to allow urllib3 v2"
-	sed -i '' 's/dep-urllib3==1.26.20/dep-urllib3>=1.0.0/' scenario4conda/.env/lib/python3.*/site-packages/dep_old-0.1.0.dist-info/METADATA
+	sed -i '' 's/dep-urllib3==1.26.20/dep-urllib3>=1.0.0/' scenario4a/.env/lib/python3.*/site-packages/dep_old-0.1.0.dist-info/METADATA
 	@echo "This doesn't work for conda because it doesn't pay any attention to the METADATA file"
-	conda install -p scenario4conda/.env --channel file://$(PWD)/conda-packages -y 'dep-urllib3=2.3.0'
+	conda install -p scenario4a/.env --channel file://$(PWD)/conda-packages -y 'dep-urllib3=2.3.0'
+
+
+scenario5: clean_scenarios
+	@echo "This scenario shows what happens if you try to first conda install, then pip install a package"
+	mkdir -p scenario5
+	conda create -p scenario5/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-plain=0.1.0' 'pip'
+	scenario5/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+	@echo "Pip will detect that the package is already installed and no-op"
+	scenario5/.env/bin/pip install 'dep-plain' --index-url http://localhost:8000 --no-cache-dir
+	scenario5/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+scenario5a: clean_scenarios
+	@echo "This scenario shows what happens if you try to first pip install, then conda install a package"
+	mkdir -p scenario5a
+	conda create -p scenario5a/.env --channel file://$(PWD)/conda-packages -y python=3.12 'pip'
+	scenario5a/.env/bin/pip install 'dep-plain==0.1.0' --index-url http://localhost:8000 --no-cache-dir
+
+	@echo "Conda will ignore the pip installed package and install 1.0.0"
+	conda install -p scenario5a/.env --channel file://$(PWD)/conda-packages -y 'dep-plain'
+	scenario5a/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+

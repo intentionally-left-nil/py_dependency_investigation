@@ -75,9 +75,9 @@ This scenario demonstrates how pip handles package updates and the importance of
    - Pip loses track of what's installed (since it uses `.dist-info` to track installations)
    - On next install, pip will reinstall the package since it can't find the `.dist-info`
 
-## Scenario 1 Conda - Package Updates and Metadata (conda)
+## Scenario 1a - Package Updates and Metadata (conda)
 
-`make scenario1conda`
+`make scenario1a`
 
 The conda version of scenario 1 highlights key differences in how conda tracks packages:
 
@@ -100,9 +100,9 @@ Demonstrates pip's behavior with conflicting dependencies:
    - Pip will downgrade urllib3 to v1 to satisfy `dep-old`'s requirements
    - This might be surprising since it modifies a previously installed package
 
-## Scenario 2 Conda - Dependency Conflicts (conda)
+## Scenario 2a - Dependency Conflicts (conda)
 
-`make scenario2conda`
+`make scenario2a`
 
 Shows how conda handles the same conflict differently:
 
@@ -123,9 +123,9 @@ Explores how pip handles packages with imprecise dependency specifications:
    - The package might not actually work with urllib3 v2
    - Demonstrates why careful version constraints are important
 
-## Scenario 3 Conda - Dependency Specification Issues (conda)
+## Scenario 3a - Dependency Specification Issues (conda)
 
-`make scenario3conda`
+`make scenario3a`
 
 The conda version of the dependency specification test:
 
@@ -146,9 +146,9 @@ A deep dive into how pip uses package metadata:
    - Allows installation of urllib3 v2
    - Highlights pip's reliance on package metadata for dependency resolution
 
-## Scenario 4 Conda - Dependency Metadata Manipulation (conda)
+## Scenario 4a - Dependency Metadata Manipulation (conda)
 
-`make scenario4conda`
+`make scenario4a`
 
 Contrasts conda's behavior with the same metadata manipulation:
 
@@ -157,6 +157,33 @@ Contrasts conda's behavior with the same metadata manipulation:
    - Modifying pip's metadata has no effect
    - Conda continues to enforce the original constraints
    - Highlights the more robust nature of conda's package tracking
+
+## Scenario 5 - Conda then Pip Installation
+
+`make scenario5`
+
+Demonstrates how pip interacts with conda-installed packages:
+
+1. First installs `dep-plain` using conda
+2. Then attempts to install the same package using pip
+3. Shows that pip:
+   - Detects the existing conda installation
+   - Recognizes the package is already present
+   - No-ops instead of reinstalling
+
+## Scenario 5a - Pip then Conda Installation
+
+`make scenario5a`
+
+Shows how conda handles pip-installed packages:
+
+1. First installs `dep-plain` using pip
+2. Then attempts to install using conda
+3. Demonstrates that conda:
+   - Ignores the pip-installed package
+   - Installs its own version over it
+   - Takes precedence over the pip installation
+   - Highlights the potential for conflicts when mixing package managers
 
 # How it works: Pip/Pypi
 
