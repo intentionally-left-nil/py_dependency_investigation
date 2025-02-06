@@ -36,6 +36,13 @@ packages: dict[str, Package] = {
                 "dependencies": []
             },
         }
+    },
+    "dep-old": {
+        "versions": {
+            "0.1.0": {
+                "dependencies": ["dep-urllib3==1.26.20"]
+            }
+        }
     }
 }
 

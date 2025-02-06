@@ -1,29 +1,27 @@
-.PHONY: setup serve scenario1 clean clean_wheels clean_scenarios build_all_wheels
+.PHONY: setup serve scenario1 clean clean_wheels clean_scenarios build_all_wheels build
 setup:
 	python -m venv .venv
 	.venv/bin/pip install -r requirements.txt
 
+build: clean
+	.venv/bin/python build_wheels.py
+
 serve:
-	.venv/bin/fastapi dev ./pypi_server.py
+	.venv/bin/fastapi dev ./pypi_server.py --no-reload
 
-clean:
-	rm -rf scenario1
-
-clean_wheels:	
+clean: clean_scenarios
 	find dep-* -type f -name "*.whl" -delete
 
 clean_scenarios:
 	rm -rf scenario*
 
-build_all_wheels: clean_wheels
-	.venv/bin/python build_wheels.py
+
 
 scenario1: clean_scenarios
-	mkdir -p scenario1
-	python -m venv scenario1/.venv
-	.venv/bin/python build_wheels.py dep-plain
 	@echo "This scenario shows that pip will update a simple package to satisfy the requirements"
 	@echo "Then, it shows that if you delete the .dist-info directory, python can use the package, but pip doesn't know it exists"
+	mkdir -p scenario1
+	python -m venv scenario1/.venv
 	scenario1/.venv/bin/pip install 'dep-plain==0.1.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario1/.venv/bin/python -c "import dep_plain; dep_plain.hello()"
 	scenario1/.venv/bin/pip install 'dep-plain>0.2.0' --index-url http://localhost:8000 --no-cache-dir
@@ -36,3 +34,14 @@ scenario1: clean_scenarios
 	@echo "Installing dep-plain to show that pip re-installs the package"
 	scenario1/.venv/bin/pip install 'dep-plain>0.2.0' --index-url http://localhost:8000 --no-cache-dir
 	scenario1/.venv/bin/python -c "import dep_plain; dep_plain.hello()"
+
+scenario2: clean_scenarios
+	@echo "This scenario covers what happens if you have a dependency that can't be satisfied"
+	@echo "First we'll try to install both at the same time, which will fail"
+	@echo "Then, we'll install urllib3 first, and then dep-old which will downgrade urllib3 to 1.x"
+	mkdir -p scenario2
+	python -m venv scenario2/.venv
+	scenario2/.venv/bin/pip install 'dep-old==0.1.0' 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir || true
+	scenario2/.venv/bin/pip install 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario2/.venv/bin/pip install 'dep-old==0.1.0' --index-url http://localhost:8000 --no-cache-dir
+
