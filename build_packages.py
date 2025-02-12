@@ -1,11 +1,12 @@
 from typing import TypedDict
 from pathlib import Path
+import json
 import tomli
 import tomli_w
 import re
 import subprocess
 import sys
-
+import shutil
 
 class Version(TypedDict):
     dependencies: list[str]
@@ -36,6 +37,14 @@ projects: dict[str, Project] = {
             "0.2.0": {"dependencies": ["dep-urllib3~=1.0"]},
         }
     },
+}
+
+hotfixes: dict[str, Project] = {
+    "dep-bad-upper-bound": {
+        "versions": {
+            "0.1.0": {"dependencies": ["dep-urllib3~=1.0"]},
+        }
+    }
 }
 
 
@@ -99,6 +108,30 @@ def build_packages_for_project(project_name: str) -> None:
         _ = pyproject_path.write_text(original_pyproject)
         _ = about_path.write_text(original_about)
 
+def create_conda_channel_with_hotfix() -> None:
+    root = Path(__file__).parent
+    src_path = root / "conda-packages"
+    if not src_path.exists():   
+        raise ValueError(f"conda-packages not found in {src_path}")
+    
+    dest_path = root / 'conda-packages-hotfix'
+    print(f"Copying conda-packages to {dest_path}")
+    shutil.copytree(src=src_path, dst=dest_path)
+
+    repodata_path = dest_path / 'noarch' / 'repodata.json'
+    if not repodata_path.exists():
+        raise ValueError(f"repodata.json not found in {repodata_path}")
+
+    print("Modifying the hotfix repodata.json")
+    repodata = json.loads(repodata_path.read_text())
+
+    for project_name, project_data in hotfixes.items():
+        for version, version_data in project_data["versions"].items():
+            repodata_key = f"{project_name}-{version}-pupa_0.conda"
+            repodata["packages.conda"][repodata_key]["depends"] = version_data["dependencies"]
+
+    _ = repodata_path.write_text(json.dumps(repodata))
+
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -110,3 +143,4 @@ if __name__ == "__main__":
             if project_name not in projects:
                 raise ValueError(f"Project {project_name} not found")
             build_packages_for_project(project_name)
+    create_conda_channel_with_hotfix()

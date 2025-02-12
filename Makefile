@@ -22,6 +22,7 @@ serve:
 
 clean: clean_scenarios
 	rm -rf conda-packages
+	rm -rf conda-packages-hotfix
 	find dep-* -type f -name "*.whl" -delete
 
 clean_scenarios:
@@ -104,6 +105,12 @@ scenario3a: clean_scenarios
 	conda create -p scenario3a/.env --channel file://$(PWD)/conda-packages -y python=3.12 'dep-bad-upper-bound' 'dep-urllib3=2.3.0'
 	scenario3a/.env/bin/python -c "import dep_bad_upper_bound; dep_bad_upper_bound.hello()"
 
+scenario3b: clean_scenarios
+	@echo "This is the same as scenario3a, but using the hotfix conda channel"
+	@echo "With the hotfix channel, conda will refuse to solve the scenario with the incompatible dep-urllib3"
+	mkdir -p scenario3b
+	conda create -p scenario3b/.env --channel file://$(PWD)/conda-packages-hotfix -y python=3.12 'dep-bad-upper-bound' 'dep-urllib3=2.3.0' || true
+
 scenario4: clean_scenarios
 	@echo "This scenario shows that pip uses the .dist-info/METADATA field to determine what a package's dependencies are"
 	@echo "First we'll install dep-old, which requires urllib3 v1. Then we'll modify the METADATA to allow urllib3 v2"
@@ -157,3 +164,12 @@ scenario6: clean_scenarios
 	scenario6/.env/bin/python -c "import dep_old; dep_old.hello()"
 	conda install -p scenario6/.env --channel file://$(PWD)/conda-packages -y 'dep-urllib3=2.3.0'
 	scenario6/.env/bin/python -c "import dep_old; dep_old.hello()"
+
+scenario7: clean_scenarios
+	@echo "This scenario shows that using pip second breaks when there's a repodata hotfix"
+	mkdir -p scenario7
+	conda create -p scenario7/.env --channel file://$(PWD)/conda-packages-hotfix -y python=3.12 pip 'dep-bad-upper-bound=0.1.0'
+	scenario7/.env/bin/python -c "import dep_bad_upper_bound; dep_bad_upper_bound.hello()"
+	@echo "Now we install urllib3 v2. Since the .dist-info allows it, pip will install the wrong urllib3 version"
+	scenario7/.env/bin/pip install 'dep-urllib3==2.3.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario7/.env/bin/python -c "import dep_bad_upper_bound; dep_bad_upper_bound.hello()"

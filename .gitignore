@@ -173,3 +173,4 @@ cython_debug/
 /scenario*
 conda-pupa/
 conda-packages/
+conda-packages-hotfix/

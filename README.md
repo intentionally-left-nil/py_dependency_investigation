@@ -133,6 +133,18 @@ The conda version of the dependency specification test:
 2. Shows that both package managers will allow potentially problematic installations
    when version constraints are too loose
 
+## Scenario 3b - Dependency Hotfixes (conda)
+
+`make scenario3b`
+
+Demonstrates conda's repodata hotfix functionality:
+
+1. Similar to scenario 3a, but uses a conda channel with dependency hotfixes
+2. Shows how conda can retroactively fix dependency issues:
+   - The hotfix updates the metadata for `dep-bad-upper-bound`
+   - Prevents installation with incompatible urllib3 v2
+   - Demonstrates conda's ability to patch package metadata without rebuilding packages
+
 ## Scenario 4 - Dependency Metadata Manipulation (pip)
 
 `make scenario4`
@@ -198,6 +210,20 @@ Demonstrates potential issues when mixing pip and conda package installations:
    - Conda installs urllib3 v2 despite pip package needing v1
    - Results in runtime errors when `dep-old` tries to use urllib3
    - Highlights why it's best to stick to one package manager
+
+## Scenario 7 - Hotfix Bypass with Pip
+
+`make scenario7`
+
+Shows how using pip after conda can bypass dependency hotfixes:
+
+1. First installs `dep-bad-upper-bound` using conda with hotfixes
+2. Then attempts to install urllib3 v2 using pip
+3. Demonstrates a serious limitation:
+   - Conda's hotfixes only work for conda operations
+   - Pip still uses the original `.dist-info` metadata
+   - Allows installation of incompatible urllib3 v2
+   - Shows another way mixing package managers can break dependencies
 
 # How it works: Pip/Pypi
 
