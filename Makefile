@@ -149,3 +149,11 @@ scenario5a: clean_scenarios
 	conda install -p scenario5a/.env --channel file://$(PWD)/conda-packages -y 'dep-plain'
 	scenario5a/.env/bin/python -c "import dep_plain; dep_plain.hello()"
 
+scenario6: clean_scenarios
+	@echo "This scenario shows what can go wrong if using conda after pip"
+	mkdir -p scenario6
+	conda create -p scenario6/.env --channel file://$(PWD)/conda-packages -y python=3.12 pip
+	scenario6/.env/bin/pip install 'dep-old==0.1.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario6/.env/bin/python -c "import dep_old; dep_old.hello()"
+	conda install -p scenario6/.env --channel file://$(PWD)/conda-packages -y 'dep-urllib3=2.3.0'
+	scenario6/.env/bin/python -c "import dep_old; dep_old.hello()"

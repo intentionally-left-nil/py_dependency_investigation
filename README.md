@@ -185,6 +185,20 @@ Shows how conda handles pip-installed packages:
    - Takes precedence over the pip installation
    - Highlights the potential for conflicts when mixing package managers
 
+## Scenario 6 - Package Manager Conflicts
+
+`make scenario6`
+
+Demonstrates potential issues when mixing pip and conda package installations:
+
+1. First installs `dep-old` using pip (which requires urllib3 v1)
+2. Then installs urllib3 v2 using conda
+3. Shows how mixing package managers can break dependencies:
+   - Conda ignores pip's dependency requirements
+   - Conda installs urllib3 v2 despite pip package needing v1
+   - Results in runtime errors when `dep-old` tries to use urllib3
+   - Highlights why it's best to stick to one package manager
+
 # How it works: Pip/Pypi
 
 ## Creating a PyPI server
