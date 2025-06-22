@@ -68,7 +68,9 @@ async def index() -> IndexResponse:
     """
     current_dir = Path(__file__).parent
     wheels = current_dir.glob("dep-*/**/*.whl")
-    projects = [IndexResponse.Project(name=parse_wheel_filename(wheel.name)[0]) for wheel in wheels]
+    project_names = {canonicalize_name(parse_wheel_filename(wheel.name)[0]) for wheel in wheels}
+    
+    projects = [IndexResponse.Project(name=name) for name in sorted(project_names)]
 
     return IndexResponse(
         meta=Meta(api_version="1.0"),
