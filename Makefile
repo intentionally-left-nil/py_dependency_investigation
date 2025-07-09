@@ -1,7 +1,7 @@
 .PHONY: setup serve clean clean_scenarios build install_pupa \
         scenario1 scenario1a scenario2 scenario2a \
         scenario3 scenario3a scenario4 scenario4a \
-        scenario5
+        scenario5 scenario5a scenario5b
 
 setup: install_pupa
 	python -m venv .venv
@@ -145,6 +145,23 @@ scenario5: clean_scenarios
 	@echo "Pip will detect that the package is already installed and no-op"
 	scenario5/.env/bin/pip install 'dep-plain' --index-url http://localhost:8000 --no-cache-dir
 	scenario5/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+scenario5b: clean_scenarios
+	@echo "This scenario shows that conda is only able to see pip packages when using the default settings, and that --no-pip hides pip packages from conda list. It also shows that removing .dist-info hides the package from conda."
+	mkdir -p scenario5b
+	conda create -p scenario5b/.env --channel file://$(PWD)/conda-packages -y python=3.12 pip
+	scenario5b/.env/bin/pip install 'dep-plain==0.1.0' --index-url http://localhost:8000 --no-cache-dir
+	scenario5b/.env/bin/python -c "import dep_plain; dep_plain.hello()"
+
+	@echo "Using conda list to see that the package is there (default: pip interoperability enabled)"
+	conda list -p scenario5b/.env | grep dep-plain
+
+	@echo "Using conda list --no-pip to hide pip packages"
+	conda list -p scenario5b/.env --no-pip | grep dep-plain || echo "Package not found with --no-pip"
+
+	@echo "Removing the .dist-info directory and checking conda list"
+	rm -rf scenario5b/.env/lib/python3.*/site-packages/dep_plain-*.dist-info
+	conda list -p scenario5b/.env | grep dep-plain || echo "Package not found after removing .dist-info"
 
 scenario5a: clean_scenarios
 	@echo "This scenario shows what happens if you try to first pip install, then conda install a package"

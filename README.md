@@ -197,6 +197,19 @@ Shows how conda handles pip-installed packages:
    - Takes precedence over the pip installation
    - Highlights the potential for conflicts when mixing package managers
 
+## Scenario 5b - Conda and pip interoperability visibility
+
+`make scenario5b`
+
+This scenario demonstrates how conda interacts with pip-installed packages in an environment:
+
+1. Installs `dep-plain` using pip in a fresh conda environment
+2. Shows that `conda list` (by default) displays pip-installed packages
+3. Shows that `conda list --no-pip` hides pip-installed packages from the output
+4. Demonstrates that removing the `.dist-info` directory causes conda to no longer see the pip package
+
+This highlights the interoperability between conda and pip, and how conda tracks (or loses track of) pip-installed packages depending on metadata and command-line flags.
+
 ## Scenario 6 - Package Manager Conflicts
 
 `make scenario6`
